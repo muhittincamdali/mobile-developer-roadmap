@@ -1,39 +1,40 @@
 # Security Policy
 
-## Reporting a Vulnerability
+## Reporting Security Issues
 
-This is a documentation repository containing roadmaps and resource links. While it doesn't contain executable code, we take security seriously.
+If you discover security concerns in this documentation, please report them responsibly.
 
-### Broken or Malicious Links
+### How to Report
 
-If you discover a link that:
-- Redirects to a malicious website
-- Has been compromised
-- Contains harmful content
-- Attempts phishing or social engineering
+1. **DO NOT** create a public issue
+2. Use GitHub's private vulnerability reporting
+3. Or contact the maintainer directly
 
-Please report it immediately by [opening an issue](https://github.com/muhittincamdali/mobile-developer-roadmap/issues/new).
+### What to Report
 
-### Response Time
+- Links to malicious websites
+- Resources that distribute malware
+- Content promoting insecure practices
+- Compromised external resources
 
-- **Critical** (malicious links): Within 24 hours
-- **High** (compromised resources): Within 48 hours
-- **Medium** (suspicious content): Within 1 week
-- **Low** (minor concerns): Within 2 weeks
+### Response Timeline
+
+- **Acknowledgment**: Within 48 hours
+- **Assessment**: Within 5 days
+- **Action**: Remove or update harmful content
+
+## Content Safety
+
+When contributing, ensure:
+- All links point to legitimate resources
+- No links to pirated content
+- Resources are from trusted sources
+- Security best practices are promoted
 
 ## Supported Versions
 
-| Version | Supported |
-|---------|-----------|
-| Latest (main branch) | ✅ |
-| Older commits | ❌ |
+| Version | Supported          |
+| ------- | ------------------ |
+| Latest  | :white_check_mark: |
 
-## Best Practices
-
-When contributing links, please verify:
-- The URL uses HTTPS when available
-- The domain is legitimate
-- The content is from a trusted source
-- No tracking parameters are included in URLs
-
-Thank you for helping keep this resource safe for everyone!
+Thank you for keeping learners safe!

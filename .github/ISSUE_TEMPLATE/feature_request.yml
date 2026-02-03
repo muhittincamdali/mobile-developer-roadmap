@@ -1,51 +1,72 @@
-name: ✨ Feature Request
-description: Suggest a new resource, section, or improvement
+name: Feature Request
+description: Suggest new topics, paths, or resources
 title: "[Feature]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Thanks for your suggestion! We appreciate community input.
-
-  - type: dropdown
-    id: type
-    attributes:
-      label: Request Type
-      description: What kind of addition or change?
-      options:
-        - New resource/link
-        - New roadmap section
-        - New project idea
-        - Improve existing content
-        - New platform/framework track
-        - Other
-    validations:
-      required: true
+        Have something to add? We'd love to hear!
 
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: Describe your suggestion in detail
-      placeholder: "I think we should add a section about..."
+      description: What would you like to see added?
+      placeholder: Describe your suggestion...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Category
+      options:
+        - New Learning Path
+        - New Topic
+        - Resource Recommendation
+        - Structure Improvement
+        - Visual/Diagram
+        - Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - iOS
+        - Android
+        - Cross-Platform
+        - General
     validations:
       required: true
 
   - type: textarea
-    id: value
+    id: rationale
     attributes:
-      label: Why is this valuable?
-      description: How would this help mobile developers?
-      placeholder: "This would help developers who..."
+      label: Rationale
+      description: Why should this be included?
+      placeholder: This is important because...
     validations:
       required: true
 
   - type: textarea
     id: resources
     attributes:
-      label: Relevant Links
-      description: Any links or references to support your suggestion?
-      placeholder: "https://..."
+      label: Resources
+      description: Any specific resources to include?
+      placeholder: |
+        - https://example.com
+        - Book: "Title"
     validations:
       required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: Contribution
+      options:
+        - label: I can help add this content
+          required: false
