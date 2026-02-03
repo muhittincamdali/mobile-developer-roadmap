@@ -1,27 +1,35 @@
 ## Description
 
-<!-- What does this PR do? -->
+<!-- What changes does this PR introduce? -->
 
 ## Type of Change
 
-- [ ] 📚 New resource/link added
-- [ ] 🗺️ Roadmap update
-- [ ] 🐛 Bug fix (broken link, typo)
-- [ ] ✨ New section or feature
-- [ ] 📝 Documentation improvement
+- [ ] New learning path
+- [ ] New topic/skill
+- [ ] Resource addition
+- [ ] Bug fix (broken link, etc.)
+- [ ] Structure improvement
+- [ ] Other
+
+## Platform
+
+- [ ] iOS
+- [ ] Android
+- [ ] Cross-Platform
+- [ ] General
 
 ## Checklist
 
-- [ ] All links are working and accessible
-- [ ] Content follows the existing format and style
-- [ ] No duplicate entries
-- [ ] Spelling and grammar checked
-- [ ] Commit messages follow conventional commits
+- [ ] All links are working
+- [ ] Content follows existing format
+- [ ] Resources are from trusted sources
+- [ ] Appropriate skill level indicated
+- [ ] No duplicate content
 
 ## Related Issues
 
-<!-- Closes #XX -->
+<!-- Fixes #123 -->
 
 ## Additional Notes
 
-<!-- Any extra context -->
+<!-- Any context or explanation -->
