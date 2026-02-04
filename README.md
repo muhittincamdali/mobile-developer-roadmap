@@ -303,3 +303,15 @@ MIT License
 <p align="center">
   <sub>Start your journey today! 🚀</sub>
 </p>
+
+---
+
+## 📈 Star History
+
+<a href="https://star-history.com/#muhittincamdali/mobile-developer-roadmap&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=muhittincamdali/mobile-developer-roadmap&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=muhittincamdali/mobile-developer-roadmap&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=muhittincamdali/mobile-developer-roadmap&type=Date" />
+ </picture>
+</a>
