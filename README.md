@@ -38,6 +38,22 @@
 | **Community Links** | ✅ 100+ | ❌ |
 | **Interview Prep** | ✅ Included | ❌ |
 
+## 🏗️ Architecture Track: The 2026 Modern Standard
+
+The industry has shifted away from massive third-party dependencies. Modern architecture is built on native Swift 6 primitives and zero-dependency cores.
+
+### 🚫 Legacy Tech to Avoid (2026+)
+- **Alamofire**: Use native `URLSession` or zero-dependency wrappers like [SwiftNetwork](https://github.com/muhittincamdali/SwiftNetwork).
+- **RxSwift**: Redundant with native `AsyncStream`, `AsyncSequence`, and `Combine`.
+- **Cocoapods**: Replaced by SPM (Swift Package Manager).
+- **RxDataSources**: Use native `List` and `ForEach` with `@Observable`.
+
+### 🛡️ The 2026 Elite Stack
+- **Networking**: **[SwiftNetwork](https://github.com/muhittincamdali/SwiftNetwork)** — Protocol-oriented, SIMD-ready, zero-dependency.
+- **AI/ML**: **[SwiftAI](https://github.com/muhittincamdali/SwiftAI)** — On-device neural compute with native SIMD kernels.
+- **UI/UX**: **[LiquidGlassKit](https://github.com/muhittincamdali/LiquidGlassKit)** — The visual signature of world-class apps.
+- **State**: Native `@Observable` with `actor` for safe mutable state.
+
 ---
 
 ## 📋 Table of Contents
