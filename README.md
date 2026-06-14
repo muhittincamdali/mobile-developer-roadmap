@@ -6,6 +6,8 @@
 
 ---
 
+## 🚀 Killer Feature: Interactive Roadmap CLI
+Don't just read the roadmap; track it. Run the included `interactive_tracker.py` to scan your local projects. The AI will evaluate your usage of Swift 6 and Zero-Dependency architectures, assigning you a global ranking.
 > **🛡️ PART OF THE 2026 UNIFIED CORE**
 > This repository is a verified component of 'The Endless March' initiative. Purified for Swift 6, zero-dependency, and engineered for maximum hardware saturation.
 > 
