@@ -8,10 +8,14 @@ let package = Package(
         .macOS(.v15)
     ],
     products: [
-        .library(name: "RoadmapKit", targets: ["RoadmapKit"])
+        .library(name: "RoadmapKit", targets: ["RoadmapKit"]),
+        .executable(name: "roadmap", targets: ["roadmap"])
     ],
     targets: [
         .target(name: "RoadmapKit"),
-        .testTarget(name: "RoadmapKitTests", dependencies: ["RoadmapKit"])
+        .target(name: "RoadmapCLI", dependencies: ["RoadmapKit"]),
+        .executableTarget(name: "roadmap", dependencies: ["RoadmapCLI"]),
+        .testTarget(name: "RoadmapKitTests", dependencies: ["RoadmapKit"]),
+        .testTarget(name: "RoadmapCLITests", dependencies: ["RoadmapCLI"])
     ]
 )
