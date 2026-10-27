@@ -255,7 +255,7 @@ cycle and Swift Package Manager.
 
 ## flutter/ios-platform: The iOS side of a Flutter app
 
-**Stage:** intermediate · **Needs:** flutter/setup, ios/app-life-cycle
+**Stage:** intermediate · **Needs:** flutter/platform-integration
 
 - The `UIScene` life cycle, which apps built with the iOS 27 SDK must adopt: since Flutter 3.41
   `flutter build ios` migrates an unchanged `AppDelegate` by itself; customized app delegates
@@ -268,6 +268,7 @@ cycle and Swift Package Manager.
 **Learn from:**
 
 - [Migration guide for adding UISceneDelegate](https://docs.flutter.dev/release/breaking-changes/uiscenedelegate)
+- [TN3187: Migrating to the UIKit scene-based life cycle](https://developer.apple.com/documentation/technotes/tn3187-migrating-to-the-uikit-scene-based-life-cycle)
 - [Swift Package Manager for app developers](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-app-developers)
 
 ## flutter/release: Building and releasing
