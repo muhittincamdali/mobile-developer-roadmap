@@ -1,0 +1,43 @@
+{
+  "name": "Mobile Developer Roadmap",
+  "repository": "muhittincamdali/mobile-developer-roadmap",
+  "tagline": {
+    "en": "A learning roadmap for iOS, Android, Flutter and React Native, with primary sources and a path planner."
+  },
+  "tags": {
+    "en": [
+      "iOS · Android",
+      "Flutter",
+      "React Native",
+      "Swift 6"
+    ]
+  },
+  "motif": "phone",
+  "buttons": [
+    "start",
+    "docs",
+    "examples"
+  ],
+  "links": {
+    "docs": "https://muhittincamdali.github.io/mobile-developer-roadmap/documentation/roadmapkit/",
+    "examples": "Examples/"
+  },
+  "languages": [
+    "en",
+    "tr",
+    "zh-CN",
+    "ja",
+    "ko",
+    "es",
+    "de",
+    "fr",
+    "pt-BR",
+    "ru"
+  ],
+  "docc": {
+    "targets": [
+      "RoadmapKit"
+    ]
+  },
+  "socialTheme": "dark"
+}
