@@ -53,11 +53,12 @@ enum MarkdownLinks {
     /// Whether GitHub could render a link from `text`, read as Markdown outside a link.
     ///
     /// Covers inline links and images (`](`), reference links and their definitions (`][`,
-    /// `]:`), autolinks and raw `<a>` or `<area>` tags, and the GitHub extensions that link bare
-    /// `https://…`, `www.…` and e-mail addresses. A backslash escape only removes the backslash
-    /// and a character reference can spell any of these, so both are read as what they decode
-    /// to. The check is deliberately wider than GitHub: it also matches inside code spans, which
-    /// is why a summary writes `@MainActor` (no letter before the `@`) but not `user@host`.
+    /// `]:`), URI and e-mail autolinks, raw `<a>` or `<area>` tags, and the GitHub extensions
+    /// that link bare `https://…`, `www.…` and e-mail addresses. A backslash escape only removes
+    /// the backslash and a character reference can spell any of these, so both are read as what
+    /// they decode to. The check is deliberately wider than GitHub: it also matches inside code
+    /// spans, which is why a summary writes `@MainActor` (no letter before the `@`) but not
+    /// `user@host`.
     static func containsLink<S: StringProtocol>(_ text: S) -> Bool {
         if containsCharacterReference(text) { return true }
         let plain = String(text.lowercased().filter { $0 != "\\" })
@@ -65,7 +66,8 @@ enum MarkdownLinks {
         return containsTagOrAutolink(plain) || containsEmailAddress(plain)
     }
 
-    /// `<a …>`, `<area …>`, or an autolink such as `<https:…>` or `<mailto:…>`, in lowercased text.
+    /// `<a …>`, `<area …>`, or an autolink such as `<https:…>`, `<mailto:…>` or `<someone@host>`,
+    /// in lowercased text.
     private static func containsTagOrAutolink(_ text: String) -> Bool {
         let characters = Array(text)
         for (index, character) in characters.enumerated() where character == "<" {
@@ -73,8 +75,21 @@ enum MarkdownLinks {
             let next = characters.indices.contains(index + 1 + run.count) ? characters[index + 1 + run.count] : " "
             if let first = run.first, first.isLetter, (2...32).contains(run.count), next == ":" { return true }
             if ["a", "area"].contains(String(run)), next.isWhitespace || next == ">" || next == "/" { return true }
+            if startsEmailAutolink(characters[(index + 1)...]) { return true }
         }
         return false
+    }
+
+    /// Whether the text after a `<` starts like a CommonMark e-mail autolink: a local part of
+    /// letters, digits and ``.!#$%&'*+/=?^_`{|}~-``, then `@` and a letter or digit. The local
+    /// part allows more than GitHub's bare addresses, so `<!@host>` and `<x'y=@host>` are links
+    /// too. Stopping at the domain's first character makes the check wider than CommonMark.
+    private static func startsEmailAutolink(_ text: ArraySlice<Character>) -> Bool {
+        let local = text.prefix { $0.isASCII && ($0.isLetter || $0.isNumber || ".!#$%&'*+/=?^_`{|}~-".contains($0)) }
+        guard !local.isEmpty else { return false }
+        let rest = text.dropFirst(local.count)
+        guard rest.first == "@", let domain = rest.dropFirst().first else { return false }
+        return domain.isASCII && (domain.isLetter || domain.isNumber)
     }
 
     /// An `@` between a character of an address's local part and a letter or digit, as in

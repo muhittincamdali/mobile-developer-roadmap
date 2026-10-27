@@ -24,7 +24,8 @@ package with a path planner, a command-line tool and an example app.
   segments (also as `%2e`), backslashes, character references such as `&#46;` or `&period;`, or
   the `<…>` form, since GitHub and browsers decode them into another address; a link title may not
   contain `[`, `]`, backticks, `<` or `\`; and a link anywhere other than a `**Learn from:**`
-  item, including bare `https://…`, `www.…` and e-mail addresses, is reported.
+  item, including bare `https://…`, `www.…` and e-mail addresses and autolinks such as
+  `<!@host>` whose local part uses any character CommonMark allows, is reported.
 - `roadmap` command: `tracks`, `list`, `show`, `path`, `next`, `graph` and `lint`, with
   `--known` and `--known-file` for progress kept in a plain text file.
 - RoadmapExplorer, a SwiftUI app for iPhone, iPad and Mac that browses the tracks, marks known

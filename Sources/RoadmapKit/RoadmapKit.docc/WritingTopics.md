@@ -45,8 +45,10 @@ An introduction to the track.
     second URL;
   - a link anywhere else: in a note, a continuation line, a summary, a practice line, a heading
     or the introduction, including bare `https://…`, `www.…` and e-mail addresses, which GitHub
-    links on its own. The check also reads code spans, so write `@MainActor` or
-    `Task<Void, Never>` freely, but not `user@example.com` or `https://…` in a summary.
+    links on its own, and autolinks such as `<x'y=@example.com>`, whose local part may also hold
+    punctuation such as `!`, `%`, `'` or `=`. The check also reads code spans, so write
+    `@MainActor` or `Task<Void, Never>` freely, but not `user@example.com` or `https://…` in a
+    summary.
 
 ## What the linter checks
 

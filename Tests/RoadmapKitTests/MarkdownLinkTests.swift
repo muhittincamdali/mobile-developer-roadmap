@@ -63,6 +63,7 @@ struct MarkdownLinkTests {
         "- [Docs](https://developer.apple.com/a) <https://evil.example/>",
         "- [Docs](https://developer.apple.com/a) — see www.evil.example",
         "- [Docs](https://developer.apple.com/a) — ask someone&#64;evil.example",
+        "- [Docs](https://developer.apple.com/a) — ask <!@evil.example>",
         "- [Docs](https://developer.apple.com/a)\n  [Evil](https://evil.example/)",
         "- [Docs](https://developer.apple.com/a)\n\n    [evil]: https://evil.example/",
         "- [Docs](https://developer.apple.com/a)\n  <a href=//evil.example>Evil</a>",
@@ -80,6 +81,10 @@ struct MarkdownLinkTests {
         #"- See https\://evil.example/ first."#,
         "- Write to someone@evil.example.",
         #"- Write to someone\@evil.example."#,
+        "- Write to <!@evil.example>.",
+        "- Write to <x'y=@evil.example>.",
+        "- Write to <%@evil.example>.",
+        "- Write to <{a}|b~^`#$&*/?@evil.example>.",
         "- <https://evil.example/>",
         "- <A HREF=//evil.example>Evil</A>",
         "- [evil]: https://evil.example/",
@@ -113,6 +118,7 @@ struct MarkdownLinkTests {
         let summary = """
             - `@MainActor`, `[weak self]`, `Task<Void, Never>` and `a < b`.
             - Q&A sessions, `dictionary[key]` and `@Observable` models.
+            - `Array<@Sendable () -> Void>`, `<@MainActor in>` and `x<y @z`.
             """
         let text = "# iOS\n\nIntroduction.\n\n" + Fixtures.topic("ios/links", summary: summary, practice: "Port it to `Result<T, E>`.")
             + "## ios/notes: Notes\n\n**Stage:** beginner\n\n- Text.\n\n**Learn from:**\n\n"
