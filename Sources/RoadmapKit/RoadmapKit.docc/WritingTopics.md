@@ -65,9 +65,11 @@ At most 100 problems are reported per file, then one line says that the rest wer
   `github.com/android/`.
 
 It rejects every other host, look-alike hosts (`developer.apple.com.example`), other paths on
-shared hosts (`github.com/someone/…`), user names or passwords in the URL, explicit ports and
-`utm_` tracking parameters. Blogs, courses and personal repositories are not accepted, which keeps
-the resource lists free of advertising and as current as the documentation they point to.
+shared hosts (`github.com/someone/…`), `.` and `..` path segments (also written as `%2e`, since
+browsers resolve them and `github.com/apple/../someone` would leave an accepted path), user names
+or passwords in the URL, explicit ports and `utm_` tracking parameters. Blogs, courses and personal
+repositories are not accepted, which keeps the resource lists free of advertising and as current as
+the documentation they point to.
 
 Whether a link still works is checked separately: the link checker in CI requests every URL in the
 repository and fails on anything but a 2xx answer.

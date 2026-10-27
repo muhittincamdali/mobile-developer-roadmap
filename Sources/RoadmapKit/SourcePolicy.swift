@@ -66,6 +66,13 @@ public struct SourcePolicy: Sendable, Equatable {
         if components.port != nil {
             return "must not name a port"
         }
+        // Browsers resolve `.` and `..` segments, also when written as `%2e`, before sending the
+        // request, so `github.com/apple/../evil` would open `github.com/evil` while still matching
+        // the `github.com/apple/` prefix. `path` is already percent-decoded.
+        if components.path.split(separator: "/", omittingEmptySubsequences: false)
+            .contains(where: { $0 == "." || $0 == ".." }) {
+            return "must not contain `.` or `..` path segments"
+        }
         if hosts.contains(host) { return nil }
         let hostAndPath = host + components.path
         if pathPrefixes.contains(where: { hostAndPath.hasPrefix($0) }) { return nil }
