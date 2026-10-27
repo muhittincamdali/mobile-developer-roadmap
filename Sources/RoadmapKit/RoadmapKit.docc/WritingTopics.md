@@ -36,6 +36,17 @@ An introduction to the track.
 - `**Practice:**` is one optional line.
 - `**Learn from:**` comes last and is followed only by `- [Title](URL)` items, up to 16. A note
   after the link and indented continuation lines are allowed.
+- Links appear only as those items. The linter checks a URL as it is written, while GitHub
+  renders the link after decoding it, so anything that would make the two differ is reported
+  with its line:
+  - a URL with a backslash, a character reference such as `&#46;` or `&period;`, the `<…>` form or
+    a space: `https://github.com/apple/&#46;&#46;/someone` would open `github.com/someone`;
+  - a link title with `[`, `]`, a backtick, `<` or `\`, which can move the end of the link to a
+    second URL;
+  - a link anywhere else: in a note, a continuation line, a summary, a practice line, a heading
+    or the introduction, including bare `https://…`, `www.…` and e-mail addresses, which GitHub
+    links on its own. The check also reads code spans, so write `@MainActor` or
+    `Task<Void, Never>` freely, but not `user@example.com` or `https://…` in a summary.
 
 ## What the linter checks
 
@@ -66,7 +77,8 @@ At most 100 problems are reported per file, then one line says that the rest wer
 
 It rejects every other host, look-alike hosts (`developer.apple.com.example`), other paths on
 shared hosts (`github.com/someone/…`), `.` and `..` path segments (also written as `%2e`, since
-browsers resolve them and `github.com/apple/../someone` would leave an accepted path), user names
+browsers resolve them and `github.com/apple/../someone` would leave an accepted path), backslashes
+(browsers read them as `/`), user names
 or passwords in the URL, explicit ports and `utm_` tracking parameters. Blogs, courses and personal
 repositories are not accepted, which keeps the resource lists free of advertising and as current as
 the documentation they point to.

@@ -20,6 +20,11 @@ package with a path planner, a command-line tool and an example app.
 - `RoadmapKit` library: a bounded parser that reports problems with file and line, a linter for
   unique IDs, missing or later-stage needs, loops and non-primary links, a learning-path planner
   that skips known topics, `nextTopics(knowing:)`, and a Mermaid graph of a track.
+- Links are checked as GitHub renders them: a resource URL may not contain `.` or `..` path
+  segments (also as `%2e`), backslashes, character references such as `&#46;` or `&period;`, or
+  the `<…>` form, since GitHub and browsers decode them into another address; a link title may not
+  contain `[`, `]`, backticks, `<` or `\`; and a link anywhere other than a `**Learn from:**`
+  item, including bare `https://…`, `www.…` and e-mail addresses, is reported.
 - `roadmap` command: `tracks`, `list`, `show`, `path`, `next`, `graph` and `lint`, with
   `--known` and `--known-file` for progress kept in a plain text file.
 - RoadmapExplorer, a SwiftUI app for iPhone, iPad and Mac that browses the tracks, marks known
