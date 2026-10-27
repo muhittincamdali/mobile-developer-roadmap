@@ -49,6 +49,15 @@ public enum TopicParser {
         var current: TopicDraft?
         var fenceStart = 0
 
+        // Lines outside a topic's body are rendered too, so they may not carry a link either. The
+        // body of a topic whose heading was rejected is not checked again: that file already fails.
+        var afterRejectedHeading = false
+        func checkOutsideTopics(_ line: Substring, at location: SourceLocation) {
+            if !afterRejectedHeading, MarkdownLinks.containsLink(line) {
+                log.append(Diagnostic(MarkdownLinks.outsideTopicsProblem, at: location))
+            }
+        }
+
         func finish() {
             guard let draft = current else { return }
             current = nil
@@ -63,10 +72,12 @@ public enum TopicParser {
             let wasInCode = fence.isOpen
             if fence.consume(line) {
                 if !wasInCode { fenceStart = number }
+                if current == nil { checkOutsideTopics(line, at: location) }
                 current?.body.append((number, line))
                 continue
             }
             if line.hasPrefix("# ") {
+                checkOutsideTopics(line, at: location)
                 if parsed.title == nil && current == nil && parsed.topics.isEmpty {
                     parsed.title = line.dropFirst(2).trimmingSpaces()
                 } else {
@@ -76,6 +87,9 @@ public enum TopicParser {
             }
             if line.hasPrefix("## ") {
                 finish()
+                afterRejectedHeading = false
+                checkOutsideTopics(line, at: location)
+                afterRejectedHeading = true
                 if parsed.topics.count >= limits.maxTopicsPerFile {
                     log.append(Diagnostic("more than \(limits.maxTopicsPerFile) topics in one file; the rest were not read", at: location))
                     parsed.diagnostics = log.entries
@@ -98,8 +112,10 @@ public enum TopicParser {
                     continue
                 }
                 current = TopicDraft(id: id, title: title, line: number)
+                afterRejectedHeading = false
                 continue
             }
+            if current == nil { checkOutsideTopics(line, at: location) }
             current?.body.append((number, line))
         }
         if fence.isOpen {
@@ -138,9 +154,9 @@ public enum TopicParser {
         return slug.allSatisfy { $0.isASCII && ($0.isLowercase || $0.isNumber || $0 == "-") }
     }
 
-    /// Reads `- [Title](url)` with an optional note after it; `nil` when the line is not a link
-    /// item. URLs may contain balanced parentheses, as in `.../init(exactly:)`.
-    static func parseResourceItem(_ line: Substring) -> Resource? {
+    /// Reads `- [Title](url)` and the note after it; `nil` when the line is not a link item. URLs
+    /// may contain balanced parentheses, as in `.../init(exactly:)`.
+    static func parseResourceItem(_ line: Substring) -> (resource: Resource, note: Substring)? {
         guard line.hasPrefix("- [") else { return nil }
         let afterBracket = line.dropFirst(3)
         guard let close = afterBracket.range(of: "](") else { return nil }
@@ -159,7 +175,7 @@ public enum TopicParser {
         guard cursor < afterBracket.endIndex, !title.isEmpty else { return nil }
         let url = afterBracket[close.upperBound..<cursor].trimmingSpaces()
         guard !url.isEmpty, !url.contains(" ") else { return nil }
-        return Resource(title: title, url: url)
+        return (Resource(title: title, url: url), afterBracket[afterBracket.index(after: cursor)...])
     }
 }
 
@@ -189,6 +205,9 @@ private struct TopicDraft {
         var fence = FenceTracker()
         for (number, text) in body[(metaIndex + 1)...] {
             let location = SourceLocation(file: file, line: number)
+            if !inResources, MarkdownLinks.containsLink(text) {
+                diagnostics.append(Diagnostic("\(id): \(MarkdownLinks.outsideItemsProblem)", at: location))
+            }
             if fence.consume(text) {
                 if inResources {
                     diagnostics.append(Diagnostic("\(id): `**Learn from:**` must be the last part of a topic", at: location))
@@ -198,13 +217,18 @@ private struct TopicDraft {
                 continue
             }
             if inResources {
-                if text.allSatisfy(\.isWhitespace) || text.hasPrefix("  ") { continue }
-                guard let resource = TopicParser.parseResourceItem(text) else {
+                if text.allSatisfy(\.isWhitespace) || text.hasPrefix("  ") {
+                    if MarkdownLinks.containsLink(text) {
+                        diagnostics.append(Diagnostic("\(id): \(MarkdownLinks.outsideItemsProblem)", at: location))
+                    }
+                    continue
+                }
+                guard let (resource, note) = TopicParser.parseResourceItem(text) else {
                     diagnostics.append(Diagnostic("\(id): after `**Learn from:**` only `- [Title](https://…)` items may follow", at: location))
                     continue
                 }
-                if let problem = MarkdownLinks.destinationProblem(resource.url) {
-                    diagnostics.append(Diagnostic("\(id): `\(resource.url)` \(problem)", at: location))
+                if let problem = MarkdownLinks.itemProblem(resource, note: note) {
+                    diagnostics.append(Diagnostic("\(id)\(problem)", at: location))
                     continue
                 }
                 guard resources.count < limits.maxResourcesPerTopic else {
