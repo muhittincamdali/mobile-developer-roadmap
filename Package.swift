@@ -16,6 +16,6 @@ let package = Package(
         .target(name: "RoadmapCLI", dependencies: ["RoadmapKit"]),
         .executableTarget(name: "roadmap", dependencies: ["RoadmapCLI"]),
         .testTarget(name: "RoadmapKitTests", dependencies: ["RoadmapKit"]),
-        .testTarget(name: "RoadmapCLITests", dependencies: ["RoadmapCLI"])
+        .testTarget(name: "RoadmapCLITests", dependencies: ["RoadmapCLI", "RoadmapKit"])
     ]
 )
