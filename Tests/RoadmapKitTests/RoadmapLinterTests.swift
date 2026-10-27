@@ -88,6 +88,7 @@ struct RoadmapLinterTests {
         "https://github.com/swiftlang/swift-evolution/blob/main/proposals/0466-control-default-actor-isolation.md",
         "https://GitHub.com/apple/swift-testing",
         "https://support.google.com/googleplay/android-developer/answer/6346149",
+        "https://play.google/developer-content-policy/",
     ])
     func accepted(url: String) {
         #expect(SourcePolicy.primarySources.problem(with: url) == nil)
@@ -113,6 +114,7 @@ struct RoadmapLinterTests {
         ("https://github.com/apple-fan/swift", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
         ("https://github.com/facebook/react-native-fork", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
         ("https://support.google.com/mail/answer/1", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
+        ("https://play.google/developer-content-policy-archive/", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
     ])
     func rejected(url: String, problem: String) {
         #expect(SourcePolicy.primarySources.problem(with: url) == problem)

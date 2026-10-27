@@ -44,7 +44,7 @@ public struct SourcePolicy: Sendable, Equatable {
             "github.com/facebook/react-native/",
             "github.com/react-native-community/",
             "github.com/OWASP/",
-            "play.google/developer-content-policy",
+            "play.google/developer-content-policy/",
             "support.google.com/googleplay/",
             "google.github.io/eng-practices/",
             "oss.callstack.com/react-native-testing-library/",
