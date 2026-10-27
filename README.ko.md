@@ -1,4 +1,4 @@
-<!-- i18n-source: README.md@cccc90073ab7ae7f71e228145f72b9c22dc68449 status=reviewed -->
+<!-- i18n-source: README.md@cf4689e608e0272773d1a42e91e65ef3e7979692 status=reviewed -->
 <!-- brand:start -->
 
 <p align="center"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/muhittincamdali/mobile-developer-roadmap/main/.github/brand/banner-dark.svg"><source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/muhittincamdali/mobile-developer-roadmap/main/.github/brand/banner-light.svg"><img src="https://raw.githubusercontent.com/muhittincamdali/mobile-developer-roadmap/main/.github/brand/banner-light.svg" alt="Mobile Developer Roadmap: A learning roadmap for iOS, Android, Flutter and React Native, with primary sources and a path planner."></picture></p>
