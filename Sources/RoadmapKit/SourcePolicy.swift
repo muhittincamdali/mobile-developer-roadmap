@@ -57,6 +57,11 @@ public struct SourcePolicy: Sendable, Equatable {
               let host = components.host?.lowercased(), !host.isEmpty else {
             return "must be an https URL"
         }
+        // The URL standard treats `\` as `/` in https URLs, so `github.com/apple/..\evil` opens
+        // `github.com/evil`; `URLComponents` keeps it as an ordinary path character.
+        if url.contains("\\") {
+            return "must not contain a backslash, which browsers read as `/`"
+        }
         if components.user != nil || components.password != nil {
             return "must not contain a user name or password"
         }

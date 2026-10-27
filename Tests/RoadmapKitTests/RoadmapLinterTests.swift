@@ -107,6 +107,8 @@ struct RoadmapLinterTests {
         ("https://github.com/apple/%2E./evil/repo", "must not contain `.` or `..` path segments"),
         ("https://github.com/apple/./swift-testing", "must not contain `.` or `..` path segments"),
         ("https://developer.apple.com/documentation/..", "must not contain `.` or `..` path segments"),
+        (#"https://github.com/apple/..\evil/repo"#, "must not contain a backslash, which browsers read as `/`"),
+        (#"https://github.com\@evil.example/apple/"#, "must not contain a backslash, which browsers read as `/`"),
         ("https://medium.com/some-post", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
         ("https://evil.developer.apple.com/", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),
         ("https://developer.apple.com.evil.example/", "is not a primary source (see SourcePolicy in Sources/RoadmapKit/SourcePolicy.swift)"),

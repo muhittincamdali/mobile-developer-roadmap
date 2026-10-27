@@ -203,6 +203,10 @@ private struct TopicDraft {
                     diagnostics.append(Diagnostic("\(id): after `**Learn from:**` only `- [Title](https://…)` items may follow", at: location))
                     continue
                 }
+                if let problem = MarkdownLinks.destinationProblem(resource.url) {
+                    diagnostics.append(Diagnostic("\(id): `\(resource.url)` \(problem)", at: location))
+                    continue
+                }
                 guard resources.count < limits.maxResourcesPerTopic else {
                     diagnostics.append(Diagnostic("\(id) lists more than \(limits.maxResourcesPerTopic) resources", at: location))
                     continue
