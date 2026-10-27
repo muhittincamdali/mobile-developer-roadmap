@@ -40,4 +40,29 @@ struct DocumentationExampleTests {
         #expect(roadmap.topic(id: "ios/concurrency") != nil)
         #expect(roadmap.dependents(of: "ios/concurrency").map(\.id).contains("ios/swift-6-mode"))
     }
+
+    /// The tests above repeat the article code, so this checks that the articles still show those
+    /// calls and results. Whitespace is ignored, so rewrapping an article does not fail it.
+    @Test("The articles show the calls and results tested above", arguments: [
+        ("RoadmapKit.md", #"roadmap.plan(to: ["ios/swift-6-mode"], knowing: ["foundations/programming", "ios/swift"])"#),
+        ("PlanningALearningPath.md", #"roadmap.plan(to: ["ios/swift-6-mode", "flutter/ios-platform"], knowing: ["foundations/programming", "ios/swift"])"#),
+        ("PlanningALearningPath.md", #"plan.alreadyKnown // ["foundations/programming", "ios/swift"]"#),
+        ("PlanningALearningPath.md", #"let known: Set = ["foundations/programming", "foundations/command-line", "foundations/git"]"#),
+        ("PlanningALearningPath.md", "roadmap.nextTopics(knowing: known, track: .reactNative)"),
+        ("PlanningALearningPath.md", "print(topic.id) // react-native/javascript"),
+        ("GettingStarted.md", "RoadmapLinter().lint(roadmap)"),
+        ("GettingStarted.md", "roadmap.filter(TopicFilter(track: .flutter, stage: .beginner))"),
+        ("GettingStarted.md", #"roadmap.topic(id: "ios/concurrency")"#),
+        ("GettingStarted.md", #"roadmap.dependents(of: "ios/concurrency")"#),
+    ])
+    func articleShowsTestedCode(article: String, code: String) throws {
+        let url = RepositoryRoadmapTests.root
+            .appendingPathComponent("Sources/RoadmapKit/RoadmapKit.docc")
+            .appendingPathComponent(article)
+        let text = try String(contentsOf: url, encoding: .utf8)
+        func withoutWhitespace(_ string: String) -> String {
+            string.filter { !$0.isWhitespace }
+        }
+        #expect(withoutWhitespace(text).contains(withoutWhitespace(code)))
+    }
 }
