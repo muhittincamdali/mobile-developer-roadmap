@@ -69,9 +69,9 @@ struct RoadmapTests {
     func folderLimit() throws {
         let folder = try TemporaryFolder()
         try folder.writeRoadmap()
-        for index in 0..<10 { try folder.write("extra-\(index).txt", "") }
+        for index in 0..<2_000 { try folder.write("extra-\(index).md", "") }
         let roadmap = try Roadmap.load(from: folder.url, limits: RoadmapLimits(maxFolderEntries: 4))
-        #expect(roadmap.diagnostics.map(\.message).contains("the folder has more than 4 entries; only the track files were read"))
+        #expect(roadmap.diagnostics.map(\.message) == ["the folder has more than 4 entries; only the track files were read"])
         #expect(roadmap.topics.count == Track.allCases.count, "track files are read by name, whatever the listing shows")
     }
 

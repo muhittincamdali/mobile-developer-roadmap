@@ -82,13 +82,19 @@ public struct Roadmap: Sendable {
         var topics: [Topic] = []
         var diagnostics: [Diagnostic] = []
         let keys: [URLResourceKey] = [.isSymbolicLinkKey, .isRegularFileKey]
-        let entries = try manager.contentsOfDirectory(at: folder, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles])
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        // The listing stops one entry past the limit instead of reading the whole folder, so a
+        // folder with millions of files costs the same as one with 65.
+        var entries: [URL] = []
+        let enumerator = manager.enumerator(at: folder, includingPropertiesForKeys: keys, options: [.skipsHiddenFiles, .skipsSubdirectoryDescendants])
+        while entries.count <= limits.maxFolderEntries, let entry = enumerator?.nextObject() as? URL {
+            entries.append(entry)
+        }
         if entries.count > limits.maxFolderEntries {
             diagnostics.append(Diagnostic("the folder has more than \(limits.maxFolderEntries) entries; only the track files were read", at: SourceLocation(file: folder.lastPathComponent, line: 0)))
+            entries.removeAll()
         }
         let trackFiles = Set(Track.allCases.map(\.fileName))
-        for entry in entries.prefix(limits.maxFolderEntries) where entry.pathExtension == "md" {
+        for entry in entries.sorted(by: { $0.lastPathComponent < $1.lastPathComponent }) where entry.pathExtension == "md" {
             let name = entry.lastPathComponent
             if !trackFiles.contains(name) && !otherAllowedFiles.contains(name) {
                 diagnostics.append(Diagnostic("`\(name)` is not a track file (\(Track.allCases.map(\.fileName).joined(separator: ", "))); it was not read", at: SourceLocation(file: name, line: 0)))
