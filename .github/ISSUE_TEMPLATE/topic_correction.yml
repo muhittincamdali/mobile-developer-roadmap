@@ -1,0 +1,32 @@
+name: Topic correction
+description: A topic is outdated, wrong, or one of its links is broken.
+title: "[Correction] "
+labels: ["correction"]
+body:
+  - type: input
+    id: topic
+    attributes:
+      label: Topic ID
+      description: The ID in the topic heading, for example ios/app-life-cycle.
+      placeholder: ios/app-life-cycle
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is wrong
+      description: Quote the part of the topic or the link and explain what is wrong or out of date.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Primary source
+      description: A link to Apple, Android, Kotlin, Flutter, Dart, React, React Native or Expo documentation, a Swift Evolution proposal, an RFC or OWASP that shows the current state.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: The OS, SDK or framework version the correction applies to, if it depends on one.
