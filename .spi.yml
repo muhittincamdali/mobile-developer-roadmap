@@ -1,0 +1,7 @@
+version: 1
+builder:
+  configs:
+    - platform: ios
+      scheme: RoadmapKit
+      documentation_targets: [RoadmapKit]
+    - platform: macos-spm
