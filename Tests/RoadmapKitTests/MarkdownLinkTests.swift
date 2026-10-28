@@ -106,6 +106,68 @@ struct MarkdownLinkTests {
         #expect(parsed.diagnostics.map(\.message) == [Self.topicLinkProblem])
     }
 
+    /// Inside an HTML block GitHub reads the line with an HTML parser, which accepts attribute
+    /// names that inline raw HTML does not, so these rendered an image outside `SourcePolicy`.
+    @Test("Rejects a line that starts an HTML block", arguments: [
+        "- <div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        #"- <div> <img "a" src=/evil-user/repo/raw/main/x.png>"#,
+        "- <div> <img =x src=/evil-user/repo/raw/main/x.png>",
+        "- <p> <img =x src=//evil.example/x.png>",
+        "- <div> <a 1 href=https:evil.example>Evil</a>",
+        #"- <div> <img 1 src=https:/\evil.example/x.png>"#,
+        #"- <div> <img 1 src=https:\/\/evil.example/x.png>"#,
+        "- <div> <img 1 src=https:/&#47evil.example/x.png>",
+        "- <div> <img 1 src=https://evil&#46;example/x.png>",
+        "- <div> <img 1 src=https://evil&period;example/x.png>",
+        "<div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        "> <div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        "1. <div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        "- > 2) <DIV>",
+        "- <details open>",
+        "- </div>",
+        "- <pre>",
+        "- <!-- hidden -->",
+        "- <!DOCTYPE html>",
+        "- <![CDATA[x]]>",
+        "- <?php ?>",
+        "- Pic <img 1 src=/evil-user/repo/raw/main/x.png>",
+        #"- Pic <img "a" src=/evil-user/repo/raw/main/x.png>"#,
+        "- Pic <img =x src=/evil-user/repo/raw/main/x.png>",
+        "- `x<y @z`",
+    ])
+    func htmlBlockInSummary(summary: String) {
+        let text = "# iOS\n\n" + Fixtures.topic("ios/links", summary: summary)
+        let parsed = TopicParser.parse(text, track: .ios, file: "ios.md")
+        #expect(parsed.diagnostics.map(\.message) == [Self.topicLinkProblem])
+    }
+
+    @Test("Rejects an HTML block on the line after a list item")
+    func htmlBlockOnNextLine() {
+        let text = "# iOS\n\n" + Fixtures.topic("ios/links", summary: "- <div>\n  <img 1 src=/evil-user/repo/raw/main/x.png>")
+        let parsed = TopicParser.parse(text, track: .ios, file: "ios.md")
+        #expect(parsed.diagnostics.map(\.message) == [Self.topicLinkProblem, Self.topicLinkProblem])
+        #expect(parsed.diagnostics.map(\.location.line) == [7, 8])
+    }
+
+    @Test("Rejects an HTML block in a note or a continuation line", arguments: [
+        "- [Docs](https://developer.apple.com/a) <div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        #"- [Docs](https://developer.apple.com/a) <img "a" src=/evil-user/repo/raw/main/x.png>"#,
+        "- [Docs](https://developer.apple.com/a) <img =x src=/evil-user/repo/raw/main/x.png>",
+        "- [Docs](https://developer.apple.com/a)\n  <div> <img 1 src=/evil-user/repo/raw/main/x.png>",
+        "- [Docs](https://developer.apple.com/a)\n  <details>",
+    ])
+    func htmlBlockInItem(items: String) {
+        let parsed = parse(learnFrom: items)
+        #expect(parsed.diagnostics.map(\.message) == [Self.topicLinkProblem])
+    }
+
+    @Test("Rejects an HTML block in the introduction")
+    func htmlBlockOutsideTopics() {
+        let header = "# iOS\n\n<p> <img 1 src=/evil-user/repo/raw/main/x.png>\n\n"
+        let parsed = TopicParser.parse(header + Fixtures.topic("ios/links"), track: .ios, file: "ios.md")
+        #expect(parsed.diagnostics.map(\.message) == [Self.fileLinkProblem])
+    }
+
     @Test("Rejects links in the title, the introduction and the headings", arguments: [
         "# iOS [Evil](https://evil.example/)\n\n",
         "# iOS\n\nAn introduction with <https://evil.example/>.\n\n",
@@ -128,7 +190,9 @@ struct MarkdownLinkTests {
         let summary = """
             - `@MainActor`, `[weak self]`, `Task<Void, Never>` and `a < b`.
             - Q&A sessions, `dictionary[key]` and `@Observable` models.
-            - `Array<@Sendable () -> Void>`, `<@MainActor in>` and `x<y @z`.
+            - `Array<@Sendable () -> Void>` and `<@MainActor in>`.
+            - `1 < 2`, `x<y` and a quote:
+            > Not a tag.
             - `Array<Int>`, `Dictionary<String, [Int]>`, `<T: Equatable>` and `<br/>`.
             - Issue #12 & #x and an `&#` without a number.
             """
@@ -138,6 +202,20 @@ struct MarkdownLinkTests {
         let parsed = TopicParser.parse(text, track: .ios, file: "ios.md")
         #expect(parsed.diagnostics.isEmpty)
         #expect(parsed.topics.map(\.id) == ["ios/links", "ios/notes"])
+    }
+
+    @Test("The HTML block forms fail the lint of a whole roadmap")
+    func reportedHTMLForms() throws {
+        let summary = """
+            - <div> <img 1 src=/evil-user/repo/raw/main/x.png>
+            - <div> <img "a" src=/evil-user/repo/raw/main/x.png>
+            - <div> <img =x src=/evil-user/repo/raw/main/x.png>
+            """
+        let folder = try TemporaryFolder()
+        try folder.writeRoadmap([.engineering: "# Engineering\n\n" + Fixtures.topic("engineering/basics", summary: summary)])
+        let roadmap = try Roadmap.load(from: folder.url)
+        let messages = RoadmapLinter().lint(roadmap).map(\.message)
+        #expect(messages == Array(repeating: "engineering/basics: links may only appear as `- [Title](https://…)` items under `**Learn from:**`", count: 3))
     }
 
     @Test("The three reported forms fail the lint of a whole roadmap")

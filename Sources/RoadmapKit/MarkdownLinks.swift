@@ -54,13 +54,14 @@ enum MarkdownLinks {
     ///
     /// Covers inline links and images (`](`), reference links and their definitions (`][`,
     /// `]:`), URI and e-mail autolinks, raw `<a>` or `<area>` tags, raw tags with attributes such
-    /// as `<img src=…>` (GitHub links every image), and the GitHub extensions that link bare
-    /// `https://…`, `www.…` and e-mail addresses. A backslash escape only removes the backslash
-    /// and a character reference can spell any of these, so both are read as what they decode to. The check is deliberately wider than GitHub: it also matches inside code
-    /// spans, which is why a summary writes `@MainActor` (no letter before the `@`) but not
-    /// `user@host`.
+    /// as `<img src=…>` (GitHub links every image), the GitHub extensions that link bare
+    /// `https://…`, `www.…` and e-mail addresses, and lines that may start an HTML block. A
+    /// backslash escape only removes the backslash and a character reference can spell any of
+    /// these, so both are read as what they decode to. The check is deliberately wider than
+    /// GitHub: it also matches inside code spans, which is why a summary writes `@MainActor` (no
+    /// letter before the `@`) but not `user@host`.
     static func containsLink<S: StringProtocol>(_ text: S) -> Bool {
-        if containsCharacterReference(text) { return true }
+        if containsCharacterReference(text) || startsHTMLBlock(text) { return true }
         let plain = String(text.lowercased().filter { $0 != "\\" })
         if ["](", "][", "]:", "://", "www."].contains(where: { plain.contains($0) }) { return true }
         return containsTagOrAutolink(plain) || containsEmailAddress(plain)
@@ -85,8 +86,13 @@ enum MarkdownLinks {
     /// whitespace and an attribute name, a `/` that does not close the tag, or the end of the
     /// line, since a tag may continue on the next one. Browsers decode character references in an
     /// attribute even without the `;`, so `<img src="https:&#47&#47host/x.png">` loads from
-    /// `host`, and GitHub wraps every image in a link. Generic code such as `Array<Int>`,
-    /// `Task<Void, Never>` or `x<y @z` opens no tag with attributes.
+    /// `host`, and GitHub wraps every image in a link.
+    ///
+    /// After the tag name and whitespace anything but `>` counts as an attribute. Inline raw HTML
+    /// only accepts attribute names that start with a letter, `_` or `:`, but inside an HTML block
+    /// GitHub hands the line to an HTML parser, which reads `<img 1 src=…>` or `<img "a" src=…>`
+    /// as an image with a `src`. Generic code such as `Array<Int>` or `Task<Void, Never>` has no
+    /// whitespace right after the name.
     private static func opensTagWithAttributes(_ text: ArraySlice<Character>) -> Bool {
         guard let first = text.first, first.isASCII, first.isLetter else { return false }
         let afterName = text.drop { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-") }
@@ -94,7 +100,34 @@ enum MarkdownLinks {
         guard let next = afterSpace.first else { return true }
         if next == "/" { return afterSpace.dropFirst().first != ">" }
         let hasSpace = afterSpace.count < afterName.count
-        return hasSpace && next.isASCII && (next.isLetter || next == "_" || next == ":")
+        return hasSpace && next != ">"
+    }
+
+    /// Whether `line` could start a CommonMark HTML block (types 1 to 7), also inside list items
+    /// and block quotes: a `<` followed by a letter, `/`, `!` or `?`, after any `>`, `-`, `*`,
+    /// `+`, `1.` or `1)` markers. GitHub passes such a block to an HTML parser line by line, and
+    /// its `<!--`, `<pre>` or `<div>` forms can run over later lines, so the line is rejected as a
+    /// whole instead of being read as Markdown. The check is wider than CommonMark, which needs
+    /// a known tag name or a complete tag for some types.
+    static func startsHTMLBlock<S: StringProtocol>(_ line: S) -> Bool {
+        var rest = Substring(line).drop(while: \.isWhitespace)
+        while let marker = rest.first {
+            let digits = rest.prefix { $0.isASCII && $0.isNumber }
+            let markerLength: Int
+            if ">-*+".contains(marker) {
+                markerLength = 1
+            } else if !digits.isEmpty, let delimiter = rest.dropFirst(digits.count).first, delimiter == "." || delimiter == ")" {
+                markerLength = digits.count + 1
+            } else {
+                break
+            }
+            let afterMarker = rest.dropFirst(markerLength)
+            // A list marker needs whitespace or the end of the line after it; `>` does not.
+            if marker != ">", let following = afterMarker.first, !following.isWhitespace { break }
+            rest = afterMarker.drop(while: \.isWhitespace)
+        }
+        guard rest.first == "<", let next = rest.dropFirst().first else { return false }
+        return next.isASCII && (next.isLetter || "/!?".contains(next))
     }
 
     /// Whether the text after a `<` starts like a CommonMark e-mail autolink: a local part of

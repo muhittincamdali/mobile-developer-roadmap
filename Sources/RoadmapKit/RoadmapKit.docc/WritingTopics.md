@@ -48,9 +48,13 @@ An introduction to the track.
     links on its own, and autolinks such as `<x'y=@example.com>`, whose local part may also hold
     punctuation such as `!`, `%`, `'` or `=`, and raw HTML tags with attributes, since GitHub
     links every image: `<img src="https:&#47&#47example.com/x.png">` loads from `example.com`
-    because browsers decode `&#47` in an attribute even without the `;`. The check also reads
-    code spans, so write `@MainActor`, `Task<Void, Never>` or `Array<Int>` freely, but not
-    `user@example.com`, `https://…` or `<img src=…>` in a summary.
+    because browsers decode `&#47` in an attribute even without the `;`;
+  - a line that starts with an HTML tag, such as `- <div>`, `> <p>` or `<!--`: GitHub hands it
+    to an HTML parser, which reads `<img 1 src=…>` as an image even though the attribute name
+    starts with a digit.
+
+  The check also reads code spans, so write `@MainActor`, `Task<Void, Never>` or `Array<Int>`
+  freely, but not `user@example.com`, `https://…`, `<img src=…>` or `x<y z` in a summary.
 
 ## What the linter checks
 
