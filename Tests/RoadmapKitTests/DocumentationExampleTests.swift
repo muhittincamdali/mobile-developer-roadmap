@@ -2,8 +2,8 @@ import Foundation
 import Testing
 import RoadmapKit
 
-/// The code shown in the DocC articles, run against this repository's roadmap, with the results
-/// the articles state.
+/// The code shown in the DocC articles and the README, run against this repository's roadmap,
+/// with the results the documents state.
 @Suite("Documentation examples")
 struct DocumentationExampleTests {
     let roadmap: Roadmap
@@ -39,6 +39,37 @@ struct DocumentationExampleTests {
         #expect(!roadmap.filter(TopicFilter(track: .flutter, stage: .beginner)).isEmpty)
         #expect(roadmap.topic(id: "ios/concurrency") != nil)
         #expect(roadmap.dependents(of: "ios/concurrency").map(\.id).contains("ios/swift-6-mode"))
+    }
+
+    @Test("README: the Use the library example")
+    func readmeLibraryExample() throws {
+        let plan = try roadmap.plan(to: ["flutter/architecture"], knowing: ["foundations/programming"])
+        #expect(plan.steps.last?.id == "flutter/architecture")
+        #expect(plan.alreadyKnown == ["foundations/programming"])
+        #expect(!plan.steps.contains { $0.id == "foundations/programming" })
+        #expect(plan.steps.allSatisfy { !$0.title.isEmpty })
+    }
+
+    /// The README shows the package line and the code tested above; the version it asks for is
+    /// the latest release in the changelog, so the line resolves once that release is tagged.
+    @Test("The README shows the tested library code and the latest release")
+    func readmeShowsTestedCode() throws {
+        func read(_ name: String) throws -> String {
+            try String(contentsOf: RepositoryRoadmapTests.root.appendingPathComponent(name), encoding: .utf8)
+        }
+        let readme = try read("README.md").filter { !$0.isWhitespace }
+        let release = try #require(try read("CHANGELOG.md").split(separator: "\n").first { $0.hasPrefix("## [") && !$0.hasPrefix("## [Unreleased]") })
+        let version = try #require(release.split(separator: "]").first?.dropFirst(4))
+        let lines = [
+            #".package(url: "https://github.com/muhittincamdali/mobile-developer-roadmap.git", from: "\#(version)")"#,
+            #".product(name: "RoadmapKit", package: "mobile-developer-roadmap")"#,
+            #"let roadmap = try Roadmap.load(from: URL(fileURLWithPath: "roadmap"))"#,
+            #"let plan = try roadmap.plan(to: ["flutter/architecture"], knowing: ["foundations/programming"])"#,
+            "for (number, topic) in plan.steps.enumerated() {",
+        ]
+        for line in lines {
+            #expect(readme.contains(line.filter { !$0.isWhitespace }), "README.md no longer shows \(line)")
+        }
     }
 
     /// The tests above repeat the article code, so this checks that the articles still show those
