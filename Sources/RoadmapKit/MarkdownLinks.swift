@@ -53,10 +53,10 @@ enum MarkdownLinks {
     /// Whether GitHub could render a link from `text`, read as Markdown outside a link.
     ///
     /// Covers inline links and images (`](`), reference links and their definitions (`][`,
-    /// `]:`), URI and e-mail autolinks, raw `<a>` or `<area>` tags, and the GitHub extensions
-    /// that link bare `https://…`, `www.…` and e-mail addresses. A backslash escape only removes
-    /// the backslash and a character reference can spell any of these, so both are read as what
-    /// they decode to. The check is deliberately wider than GitHub: it also matches inside code
+    /// `]:`), URI and e-mail autolinks, raw `<a>` or `<area>` tags, raw tags with attributes such
+    /// as `<img src=…>` (GitHub links every image), and the GitHub extensions that link bare
+    /// `https://…`, `www.…` and e-mail addresses. A backslash escape only removes the backslash
+    /// and a character reference can spell any of these, so both are read as what they decode to. The check is deliberately wider than GitHub: it also matches inside code
     /// spans, which is why a summary writes `@MainActor` (no letter before the `@`) but not
     /// `user@host`.
     static func containsLink<S: StringProtocol>(_ text: S) -> Bool {
@@ -66,8 +66,8 @@ enum MarkdownLinks {
         return containsTagOrAutolink(plain) || containsEmailAddress(plain)
     }
 
-    /// `<a …>`, `<area …>`, or an autolink such as `<https:…>`, `<mailto:…>` or `<someone@host>`,
-    /// in lowercased text.
+    /// `<a …>`, `<area …>`, a tag with attributes such as `<img src=…>`, or an autolink such as
+    /// `<https:…>`, `<mailto:…>` or `<someone@host>`, in lowercased text.
     private static func containsTagOrAutolink(_ text: String) -> Bool {
         let characters = Array(text)
         for (index, character) in characters.enumerated() where character == "<" {
@@ -75,9 +75,26 @@ enum MarkdownLinks {
             let next = characters.indices.contains(index + 1 + run.count) ? characters[index + 1 + run.count] : " "
             if let first = run.first, first.isLetter, (2...32).contains(run.count), next == ":" { return true }
             if ["a", "area"].contains(String(run)), next.isWhitespace || next == ">" || next == "/" { return true }
+            if opensTagWithAttributes(characters[(index + 1)...]) { return true }
             if startsEmailAutolink(characters[(index + 1)...]) { return true }
         }
         return false
+    }
+
+    /// Whether the text after a `<` opens an HTML tag that may carry attributes: a tag name, then
+    /// whitespace and an attribute name, a `/` that does not close the tag, or the end of the
+    /// line, since a tag may continue on the next one. Browsers decode character references in an
+    /// attribute even without the `;`, so `<img src="https:&#47&#47host/x.png">` loads from
+    /// `host`, and GitHub wraps every image in a link. Generic code such as `Array<Int>`,
+    /// `Task<Void, Never>` or `x<y @z` opens no tag with attributes.
+    private static func opensTagWithAttributes(_ text: ArraySlice<Character>) -> Bool {
+        guard let first = text.first, first.isASCII, first.isLetter else { return false }
+        let afterName = text.drop { $0.isASCII && ($0.isLetter || $0.isNumber || $0 == "-") }
+        let afterSpace = afterName.drop(while: \.isWhitespace)
+        guard let next = afterSpace.first else { return true }
+        if next == "/" { return afterSpace.dropFirst().first != ">" }
+        let hasSpace = afterSpace.count < afterName.count
+        return hasSpace && next.isASCII && (next.isLetter || next == "_" || next == ":")
     }
 
     /// Whether the text after a `<` starts like a CommonMark e-mail autolink: a local part of
@@ -104,10 +121,11 @@ enum MarkdownLinks {
         return false
     }
 
-    /// Whether `text` contains a CommonMark character reference: `&name;` with up to 32 ASCII
-    /// letters and digits starting with a letter, `&#` and 1–7 digits, or `&#x` and 1–6 hex
-    /// digits, each ending with `;`. Any name counts, known to HTML or not, so the check needs no
-    /// entity table; an `&` in a query string such as `?a=1&b=2` is not a reference.
+    /// Whether `text` contains a character reference: `&name;` with up to 32 ASCII letters and
+    /// digits starting with a letter, `&#` and a digit, or `&#x` and a hex digit. Any name counts,
+    /// known to HTML or not, so the check needs no entity table; an `&` in a query string such as
+    /// `?a=1&b=2` is not a reference. CommonMark needs the `;` after a number, but browsers decode
+    /// `&#47` without it inside an HTML attribute, so the numeric forms count without it.
     static func containsCharacterReference<S: StringProtocol>(_ text: S) -> Bool {
         var rest = Substring(text)
         while let ampersand = rest.firstIndex(of: "&") {
@@ -117,19 +135,18 @@ enum MarkdownLinks {
         return false
     }
 
-    /// `name;`, `#123;` or `#x1F;` at the start of `text`.
+    /// `name;`, `#1` or `#x1` at the start of `text`.
     private static func isReferenceBody(_ text: Substring) -> Bool {
+        let isDigit: (Character) -> Bool = { $0.isASCII && $0.isNumber }
+        if text.first == "#" {
+            let number = text.dropFirst()
+            if number.first == "x" || number.first == "X" {
+                return number.dropFirst().first.map { $0.isASCII && $0.isHexDigit } ?? false
+            }
+            return number.first.map(isDigit) ?? false
+        }
         guard let semicolon = text.prefix(34).firstIndex(of: ";") else { return false }
         let body = text[..<semicolon]
-        let isDigit: (Character) -> Bool = { $0.isASCII && $0.isNumber }
-        if body.first == "#" {
-            let number = body.dropFirst()
-            if number.first == "x" || number.first == "X" {
-                let hex = number.dropFirst()
-                return (1...6).contains(hex.count) && hex.allSatisfy { $0.isASCII && $0.isHexDigit }
-            }
-            return (1...7).contains(number.count) && number.allSatisfy(isDigit)
-        }
         guard let first = body.first, first.isASCII, first.isLetter, body.count <= 32 else { return false }
         return body.allSatisfy { $0.isASCII && ($0.isLetter || isDigit($0)) }
     }

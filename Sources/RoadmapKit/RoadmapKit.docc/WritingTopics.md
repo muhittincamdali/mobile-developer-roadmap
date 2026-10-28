@@ -46,9 +46,11 @@ An introduction to the track.
   - a link anywhere else: in a note, a continuation line, a summary, a practice line, a heading
     or the introduction, including bare `https://…`, `www.…` and e-mail addresses, which GitHub
     links on its own, and autolinks such as `<x'y=@example.com>`, whose local part may also hold
-    punctuation such as `!`, `%`, `'` or `=`. The check also reads code spans, so write
-    `@MainActor` or `Task<Void, Never>` freely, but not `user@example.com` or `https://…` in a
-    summary.
+    punctuation such as `!`, `%`, `'` or `=`, and raw HTML tags with attributes, since GitHub
+    links every image: `<img src="https:&#47&#47example.com/x.png">` loads from `example.com`
+    because browsers decode `&#47` in an attribute even without the `;`. The check also reads
+    code spans, so write `@MainActor`, `Task<Void, Never>` or `Array<Int>` freely, but not
+    `user@example.com`, `https://…` or `<img src=…>` in a summary.
 
 ## What the linter checks
 

@@ -67,6 +67,8 @@ struct MarkdownLinkTests {
         "- [Docs](https://developer.apple.com/a)\n  [Evil](https://evil.example/)",
         "- [Docs](https://developer.apple.com/a)\n\n    [evil]: https://evil.example/",
         "- [Docs](https://developer.apple.com/a)\n  <a href=//evil.example>Evil</a>",
+        #"- [Docs](https://developer.apple.com/a) <img src="https:&#47&#47evil.example/x.png">"#,
+        "- [Docs](https://developer.apple.com/a)\n  <source srcset=//evil.example/x.png>",
     ])
     func secondLinkInItem(items: String) {
         let parsed = parse(learnFrom: items)
@@ -87,6 +89,14 @@ struct MarkdownLinkTests {
         "- Write to <{a}|b~^`#$&*/?@evil.example>.",
         "- <https://evil.example/>",
         "- <A HREF=//evil.example>Evil</A>",
+        #"- Pic <img src="https:&#47&#47evil.example/x.png">"#,
+        #"- Pic <img src="https:/&#47evil.example/x.png">"#,
+        #"- Pic <img src="&#104ttps:&#47&#47evil.example/x.png">"#,
+        #"- Pic <IMG SRC="//evil.example/x.png">"#,
+        "- Pic <img\tsrc=//evil.example/x.png>",
+        "- Pic <img/src=//evil.example/x.png>",
+        "- Pic <img",
+        "- Slashes &#47&#47 and &#x2F&#x2f spelled as numbers.",
         "- [evil]: https://evil.example/",
         "**Practice:** Compare with [the notes][evil].",
     ])
@@ -119,6 +129,8 @@ struct MarkdownLinkTests {
             - `@MainActor`, `[weak self]`, `Task<Void, Never>` and `a < b`.
             - Q&A sessions, `dictionary[key]` and `@Observable` models.
             - `Array<@Sendable () -> Void>`, `<@MainActor in>` and `x<y @z`.
+            - `Array<Int>`, `Dictionary<String, [Int]>`, `<T: Equatable>` and `<br/>`.
+            - Issue #12 & #x and an `&#` without a number.
             """
         let text = "# iOS\n\nIntroduction.\n\n" + Fixtures.topic("ios/links", summary: summary, practice: "Port it to `Result<T, E>`.")
             + "## ios/notes: Notes\n\n**Stage:** beginner\n\n- Text.\n\n**Learn from:**\n\n"

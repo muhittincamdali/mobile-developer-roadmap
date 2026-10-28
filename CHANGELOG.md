@@ -25,7 +25,9 @@ package with a path planner, a command-line tool and an example app.
   the `<…>` form, since GitHub and browsers decode them into another address; a link title may not
   contain `[`, `]`, backticks, `<` or `\`; and a link anywhere other than a `**Learn from:**`
   item, including bare `https://…`, `www.…` and e-mail addresses and autolinks such as
-  `<!@host>` whose local part uses any character CommonMark allows, is reported.
+  `<!@host>` whose local part uses any character CommonMark allows, or raw HTML tags with
+  attributes such as `<img src=…>`, is reported. Numeric character references count without the
+  `;` too (`&#47`), since browsers decode them that way inside an HTML attribute.
 - `roadmap` command: `tracks`, `list`, `show`, `path`, `next`, `graph` and `lint`, with
   `--known` and `--known-file` for progress kept in a plain text file.
 - RoadmapExplorer, a SwiftUI app for iPhone, iPad and Mac that browses the tracks, marks known

@@ -47,8 +47,9 @@ An introduction to the track.
   repository. The accepted hosts are listed in
   [SourcePolicy.swift](../Sources/RoadmapKit/SourcePolicy.swift). Blogs, courses, videos and
   personal repositories are not accepted. Write each link as a plain `- [Title](https://…)`
-  item: no links elsewhere in the file, no backslashes or character references such as `&#46;`
-  in a URL, and no `[`, `]`, backticks, `<` or `\` in a link title, since GitHub would decode
-  them into a different link than the one the linter checked.
+  item: no links or HTML tags with attributes such as `<img src=…>` elsewhere in the file, no
+  backslashes or character references such as `&#46;` in a URL, and no `[`, `]`, backticks, `<`
+  or `\` in a link title, since GitHub would decode them into a different link than the one the
+  linter checked.
 
 Every link is checked by the link checker in CI; a page that moves or disappears fails the build.
