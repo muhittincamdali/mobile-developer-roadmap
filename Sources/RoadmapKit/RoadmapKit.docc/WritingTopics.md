@@ -1,0 +1,105 @@
+# Writing Topics
+
+The file format, the rules the linter enforces, and which links are accepted.
+
+## The format
+
+Each track is one file, `roadmap/<track>.md`. A file has one `# ` title, an optional
+introduction, and topics that start with a `## ` heading:
+
+```markdown
+# React Native
+
+An introduction to the track.
+
+## react-native/new-architecture: The New Architecture
+
+**Stage:** intermediate · **Needs:** react-native/setup
+
+- JSI, the Fabric renderer and Turbo Native Modules.
+
+**Practice:** Check every dependency of an app against the New Architecture.
+
+**Learn from:**
+
+- [About the New Architecture](https://reactnative.dev/architecture/landing-page)
+```
+
+- The heading is `<ID>: <Title>`. The ID is `<track>/<name>`: the track is the file name, the
+  name uses lowercase ASCII letters, digits and single hyphens, starts with a letter and is at
+  most 48 characters. ``TopicParser/isValidID(_:)`` checks it. The title is at most 120
+  characters.
+- The first line under the heading is the stage, optionally followed by `· **Needs:**` and a
+  comma-separated list of up to 32 IDs from any track.
+- The summary is free Markdown. Headings and resource lines inside fenced code blocks are read as
+  code.
+- `**Practice:**` is one optional line.
+- `**Learn from:**` comes last and is followed only by `- [Title](URL)` items, up to 16. A note
+  after the link and indented continuation lines are allowed.
+- Links appear only as those items. The linter checks a URL as it is written, while GitHub
+  renders the link after decoding it, so anything that would make the two differ is reported
+  with its line:
+  - a URL with a backslash, a character reference such as `&#46;` or `&period;`, the `<…>` form or
+    a space: `https://github.com/apple/&#46;&#46;/someone` would open `github.com/someone`;
+  - a link title with `[`, `]`, a backtick, `<` or `\`, which can move the end of the link to a
+    second URL;
+  - a link anywhere else: in a note, a continuation line, a summary, a practice line, a heading
+    or the introduction, including bare `https://…`, `www.…` and e-mail addresses, which GitHub
+    links on its own, and autolinks such as `<x'y=@example.com>`, whose local part may also hold
+    punctuation such as `!`, `%`, `'` or `=`, and raw HTML tags with attributes, since GitHub
+    links every image: `<img src="https:&#47&#47example.com/x.png">` loads from `example.com`
+    because browsers decode `&#47` in an attribute even without the `;`;
+  - a line that starts with an HTML tag, such as `- <div>`, `> <p>` or `<!--`: GitHub hands it
+    to an HTML parser, which reads `<img 1 src=…>` as an image even though the attribute name
+    starts with a digit.
+
+  The check also reads code spans, so write `@MainActor`, `Task<Void, Never>` or `Array<Int>`
+  freely, but not `user@example.com`, `https://…`, `<img src=…>` or `x<y z` in a summary.
+
+## What the linter checks
+
+``TopicParser`` reports format problems as it reads. ``RoadmapLinter`` then checks:
+
+| Rule                                            | Message, without the code quotes                                                 |
+| ----------------------------------------------- | --------------------------------------------------------------- |
+| IDs are unique                                  | `ios/swift is already used at ios.md:12`                        |
+| Needs exist                                     | `ios/ui needs ios/swiftu, which is not a topic`             |
+| No topic needs itself, or lists a need twice    | `ios/ui needs itself`                                           |
+| Needs are not at a later stage                  | `ios/ui is beginner but needs ios/advanced, which is advanced`  |
+| Needs do not form loops                         | `needs form a loop: ios/a → ios/b → ios/a`                      |
+| A summary and at least one link                 | `ios/x needs a **Learn from:** list with at least one link` |
+| Links follow ``SourcePolicy`` and are listed once | `ios/x: https://medium.com/… is not a primary source …`     |
+
+At most 100 problems are reported per file, then one line says that the rest were not reported.
+
+## Accepted links
+
+``SourcePolicy/primarySources`` accepts `https` links to:
+
+- platform and language documentation: Apple, Swift, Android, Kotlin, Flutter, Dart, React,
+  React Native, Expo, MDN, TypeScript, Node.js and the documentation of the libraries the
+  platforms recommend;
+- standards and security bodies: W3C, the RFC Editor, OWASP;
+- the platforms' own GitHub organisations, such as `github.com/swiftlang/` and
+  `github.com/android/`.
+
+It rejects every other host, look-alike hosts (`developer.apple.com.example`), other paths on
+shared hosts (`github.com/someone/…`), `.` and `..` path segments (also written as `%2e`, since
+browsers resolve them and `github.com/apple/../someone` would leave an accepted path), backslashes
+(browsers read them as `/`), user names
+or passwords in the URL, explicit ports and `utm_` tracking parameters. Blogs, courses and personal
+repositories are not accepted, which keeps the resource lists free of advertising and as current as
+the documentation they point to.
+
+Whether a link still works is checked separately: the link checker in CI requests every URL in the
+repository and fails on anything but a 2xx answer.
+
+## Before opening a pull request
+
+```sh
+swift run roadmap lint
+swift test
+```
+
+The test suite lints the repository's own roadmap, plans a path to every topic, and compares the
+topic counts in `roadmap/README.md` with the files.

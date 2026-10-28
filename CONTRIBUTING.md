@@ -1,80 +1,70 @@
-# Contributing to SwiftRouter
+# Contributing
 
-First off, thank you for considering contributing to SwiftRouter! It's people like you that make SwiftRouter such a great tool.
+Thanks for helping to keep the roadmap correct and current. A fix to an outdated topic or a moved
+link is as valuable as a new topic: a learner who follows a stale path loses weeks.
 
-## Code of Conduct
+## Reporting an outdated topic or a broken link
 
-This project and everyone participating in it is governed by our Code of Conduct. By participating, you are expected to uphold this code.
+Open an issue with the **Topic correction** template and include:
 
-## How Can I Contribute?
+- the topic ID (for example `ios/app-life-cycle`),
+- what is wrong or outdated, and a primary source that shows it: Apple, Android, Kotlin, Flutter,
+  Dart, React, React Native or Expo documentation, a Swift Evolution proposal, an RFC or OWASP,
+- for version-specific changes, the OS, SDK or framework version they apply to.
 
-### Reporting Bugs
+## Adding or changing a topic
 
-Before creating bug reports, please check the existing issues as you might find out that you don't need to create one. When you are creating a bug report, please include as many details as possible:
+1. Fork the repository and branch from `main`. Keep each pull request to one track.
+2. Edit `roadmap/<track>.md`. The format is described in [roadmap/README.md](roadmap/README.md) and
+   in the [Writing Topics](Sources/RoadmapKit/RoadmapKit.docc/WritingTopics.md) article:
+    - never rename a published ID: progress files and other topics refer to it,
+    - give a stage and list the topics to learn first under **Needs**; a topic may only need
+      topics of the same or an earlier stage,
+    - keep the summary to what to learn, in a few bullets, and add a practice project that fits in
+      a day or two,
+    - link primary sources only. The accepted hosts are in
+      [SourcePolicy.swift](Sources/RoadmapKit/SourcePolicy.swift); to propose a new one, explain in
+      the pull request why it is the primary source for the topic. Blogs, courses, videos and
+      personal or company repositories are not accepted, including our own.
+3. Update the topic counts in [roadmap/README.md](roadmap/README.md) and the README table if they
+   change; `swift test` checks both.
+4. Run the checks:
 
-- **Use a clear and descriptive title**
-- **Describe the exact steps which reproduce the problem**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the behavior you observed after following the steps**
-- **Explain which behavior you expected to see instead and why**
-- **Include Swift version and OS version**
+    ```sh
+    swift run roadmap lint
+    swift test
+    lychee roadmap/*.md
+    ```
 
-### Suggesting Enhancements
+    `lychee` is the link checker that CI runs; install it with `brew install lychee`. For changes
+    to the example app, also build it:
 
-Enhancement suggestions are tracked as GitHub issues. When creating an enhancement suggestion, please include:
+    ```sh
+    cd Examples/RoadmapExplorer
+    xcodebuild build -scheme RoadmapExplorer -destination 'generic/platform=iOS Simulator'
+    ```
 
-- **Use a clear and descriptive title**
-- **Provide a step-by-step description of the suggested enhancement**
-- **Provide specific examples to demonstrate the steps**
-- **Describe the current behavior and explain which behavior you expected to see instead**
-- **Explain why this enhancement would be useful**
+5. If the app's screens change, regenerate the screenshots with `scripts/capture-screens.sh`.
+6. `README.md` will have translations (`README.<language>.md`), each recording the version of
+   `README.md` it follows; CI fails while a translation is behind. If you change `README.md` and
+   cannot update the translations, say so in the pull request.
 
-### Pull Requests
+## Code style
 
-1. Fork the repo and create your branch from `main`
-2. If you've added code that should be tested, add tests
-3. If you've changed APIs, update the documentation
-4. Ensure the test suite passes
-5. Make sure your code follows the existing style (SwiftLint)
-6. Issue that pull request!
+- Swift follows the [Swift API Design Guidelines](https://www.swift.org/documentation/api-design-guidelines/)
+  and builds in the Swift 6 language mode without warnings. Document public API with DocC
+  comments (`///`).
+- Every limit and error path in `RoadmapKit` has a test; add one with any new rule or option.
+- Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/)
+  (`feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `ci:`, `chore:`).
 
-## Development Setup
+## Conduct and security
 
-```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/SwiftRouter.git
-
-# Navigate to the project
-cd SwiftRouter
-
-# Open in Xcode
-open Package.swift
-
-# Run tests
-swift test
-```
-
-## Style Guide
-
-- Follow [Swift API Design Guidelines](https://swift.org/documentation/api-design-guidelines/)
-- Use SwiftLint for code style consistency
-- Write meaningful commit messages following [Conventional Commits](https://www.conventionalcommits.org/)
-- Document public APIs with DocC-compatible comments
-
-## Commit Messages
-
-We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
-
-- `feat:` A new feature
-- `fix:` A bug fix
-- `docs:` Documentation only changes
-- `style:` Code style changes (formatting, semicolons, etc)
-- `refactor:` Code change that neither fixes a bug nor adds a feature
-- `test:` Adding missing tests
-- `chore:` Changes to the build process or auxiliary tools
-
-Example: `feat(deeplink): add universal link support`
+This project follows the [code of conduct](https://github.com/muhittincamdali/.github/blob/main/CODE_OF_CONDUCT.md)
+of all `muhittincamdali` repositories; it lists a private address for reports. Report security
+issues, including a link that now leads to a malicious page, privately as described in the
+[security policy](SECURITY.md), not in a public issue.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+By contributing you agree that your contributions are licensed under the MIT License.

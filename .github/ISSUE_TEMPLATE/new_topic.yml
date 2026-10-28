@@ -1,0 +1,39 @@
+name: New topic
+description: Propose a topic that is missing from a track.
+title: "[Topic] "
+labels: ["new topic"]
+body:
+  - type: dropdown
+    id: track
+    attributes:
+      label: Track
+      options:
+        - foundations
+        - ios
+        - android
+        - flutter
+        - react-native
+        - engineering
+    validations:
+      required: true
+  - type: input
+    id: title
+    attributes:
+      label: Title
+      placeholder: Swift concurrency
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What to learn
+      description: A few bullets, the stage (beginner, intermediate or advanced), and the existing topics it needs.
+    validations:
+      required: true
+  - type: textarea
+    id: sources
+    attributes:
+      label: Primary sources
+      description: Links to the official documentation or standard the topic is learned from. Blogs, courses and personal repositories are not accepted.
+    validations:
+      required: true
